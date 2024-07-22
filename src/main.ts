@@ -118,15 +118,16 @@ ${prDetails.description}
 
 Git diff to review:
 
-\`\`\`diff
 ${chunk.content}
 ${chunk.changes
   // @ts-expect-error - ln and ln2 exists where needed
   .map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`)
   .join("\n")}
-\`\`\`
 `;
 }
+// todo add this multiline code markdown back in at some stage 
+//\`\`\`diff
+//\`\`\`
 
 async function getAIResponse(prompt: string): Promise<Array<{
   lineNumber: string;
@@ -135,7 +136,7 @@ async function getAIResponse(prompt: string): Promise<Array<{
   const queryConfig = {
     model: OPENAI_API_MODEL,
     temperature: 0.2,
-    max_tokens: 700,
+    max_tokens: 4,
     top_p: 1,
     frequency_penalty: 0,
     presence_penalty: 0,
