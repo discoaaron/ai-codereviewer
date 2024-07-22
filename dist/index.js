@@ -153,7 +153,7 @@ function getAIResponse(prompt) {
         const queryConfig = {
             model: OPENAI_API_MODEL,
             temperature: 0.2,
-            max_tokens: 4,
+            max_tokens: 4096,
             top_p: 1,
             frequency_penalty: 0,
             presence_penalty: 0,
@@ -168,6 +168,7 @@ function getAIResponse(prompt) {
                     },
                 ] }));
             const res = ((_b = (_a = response.data.choices[0].message) === null || _a === void 0 ? void 0 : _a.content) === null || _b === void 0 ? void 0 : _b.trim()) || "{}";
+            console.log(res);
             return JSON.parse(res).reviews;
         }
         catch (error) {
