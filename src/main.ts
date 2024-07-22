@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import * as core from "@actions/core";
-import OpenAI from "openai";
+import { Configuration, OpenAIApi } from "azure-openai"; 
 import { Octokit } from "@octokit/rest";
 import parseDiff, { Chunk, File } from "parse-diff";
 import minimatch from "minimatch";
@@ -12,10 +12,26 @@ const OPENAI_API_URL: string = core.getInput("OPENAI_API_URL");
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-  baseURL: OPENAI_API_URL,
-});
+
+
+// const openai = new OpenAI({
+//   apiKey: OPENAI_API_KEY,
+//   baseURL: OPENAI_API_URL,
+// });
+
+const openai = new OpenAIApi(
+  new Configuration({
+     apiKey: OPENAI_API_KEY,
+     // add azure info into configuration
+     azure: {
+        apiKey: OPENAI_API_KEY,
+        endpoint: OPENAI_API_URL,
+        // deploymentName is optional, if you donot set it, you need to set it in the request parameter
+        deploymentName: OPENAI_API_MODEL,
+     }
+  }),
+);
+
 
 interface PRDetails {
   owner: string;
@@ -126,7 +142,7 @@ async function getAIResponse(prompt: string): Promise<Array<{
   };
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await openai.createChatCompletion({
       ...queryConfig,
       // return JSON if the model supports it:
       ...(OPENAI_API_MODEL === "gpt-4-1106-preview"
@@ -140,7 +156,7 @@ async function getAIResponse(prompt: string): Promise<Array<{
       ],
     });
 
-    const res = response.choices[0].message?.content?.trim() || "{}";
+    const res = response.data.choices[0].message?.content?.trim() || "{}";
     return JSON.parse(res).reviews;
   } catch (error) {
     console.error("Error:", error);
